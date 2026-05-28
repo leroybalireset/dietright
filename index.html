@@ -21,6 +21,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .sync-dot.ok{background:var(--green)}
 .sync-dot.err{background:var(--red)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes spin{to{transform:rotate(360deg)}}
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:680px;background:var(--card);border-top:0.5px solid var(--border);display:flex;z-index:100}
 .nav-btn{flex:1;padding:10px 4px 8px;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text3);font-size:10px;font-weight:500;transition:.15s}
 .nav-btn.active{color:var(--green)}
@@ -106,6 +107,36 @@ h3{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;le
 .modal-overlay.open{display:flex}
 .modal{background:var(--card);border-radius:var(--r);padding:20px;width:90%;max-width:600px;max-height:80vh;overflow-y:auto}
 .modal h2{font-size:16px;font-weight:600;margin-bottom:12px}
+/* Food logger */
+.food-logger{border-top:0.5px solid var(--border2);padding:12px 16px;background:var(--bg)}
+.food-logger-title{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.food-search-wrap{position:relative;margin-bottom:8px}
+.food-search-wrap input{padding-right:36px}
+.food-search-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px;padding:0;line-height:1}
+.food-results{background:var(--card);border:0.5px solid var(--border);border-radius:var(--rs);overflow:hidden;margin-bottom:8px;max-height:220px;overflow-y:auto}
+.food-result-item{padding:9px 12px;cursor:pointer;border-bottom:0.5px solid var(--border2);display:flex;justify-content:space-between;align-items:center;transition:.1s}
+.food-result-item:last-child{border-bottom:none}
+.food-result-item:hover{background:var(--bg)}
+.food-result-name{font-size:13px;font-weight:500;color:var(--text)}
+.food-result-macros{font-size:11px;color:var(--text2)}
+.food-result-src{font-size:10px;padding:2px 6px;border-radius:10px;background:var(--bbg);color:var(--btext);margin-left:6px;flex-shrink:0}
+.food-result-src.usda{background:var(--pbg);color:var(--ptext)}
+.food-add-row{display:grid;grid-template-columns:1fr 80px auto;gap:8px;align-items:center;margin-bottom:8px}
+.food-add-row .food-selected-name{font-size:13px;font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.food-log-entries{margin-bottom:8px}
+.food-log-entry{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--card);border:0.5px solid var(--border2);border-radius:var(--rs);margin-bottom:5px;font-size:12px}
+.food-log-entry-name{font-weight:500;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:8px}
+.food-log-entry-macros{color:var(--text2);white-space:nowrap;margin-right:8px}
+.food-log-entry-del{background:none;border:none;cursor:pointer;color:var(--text3);padding:0;font-size:14px;flex-shrink:0}
+.food-log-totals{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px}
+.food-log-total{background:var(--card);border:0.5px solid var(--border);border-radius:var(--rs);padding:6px;text-align:center}
+.food-log-total-v{font-size:14px;font-weight:600}
+.food-log-total-l{font-size:10px;color:var(--text2);margin-top:1px}
+.usda-btn{width:100%;margin-bottom:8px}
+.micros-toggle{font-size:11px;color:var(--blue);cursor:pointer;background:none;border:none;padding:0;margin-bottom:6px}
+.micros-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px}
+.micro-item{font-size:11px;color:var(--text2);background:var(--card);border:0.5px solid var(--border2);border-radius:4px;padding:4px 8px;display:flex;justify-content:space-between}
+.micro-val{font-weight:500;color:var(--text)}
 </style>
 </head>
 <body>
@@ -506,16 +537,27 @@ function renderToday(){
         html+=`<div class="ing-row"><div><div class="ing-name">${ing.n}</div><div class="ing-detail">${ing.d}</div></div><div class="ing-gram">${ing.g}</div></div>`;
       });
       if(note) html+=`<div class="note-done">✎ ${note}</div>`;
+      // Show logged food totals inline if any
+      const mFoods=log[mk+'Foods']||[];
+      if(mFoods.length>0){
+        const mt=mFoods.reduce((a,f)=>({p:a.p+f.p,f:a.f+f.f,c:a.c+f.c,cal:a.cal+f.cal}),{p:0,f:0,c:0,cal:0});
+        html+=`<div style="padding:8px 16px;background:var(--gbg);border-top:0.5px solid var(--border2);font-size:12px;color:var(--gtext)">
+          <i class="ti ti-check"></i> Logged: ${mFoods.length} item${mFoods.length>1?'s':''} · ${Math.round(mt.p*10)/10}g P · ${Math.round(mt.f*10)/10}g F · ${Math.round(mt.c*10)/10}g C · ${Math.round(mt.cal)} cal
+        </div>`;
+      }
       html+=`<div class="meal-actions">
         <button class="btn ${eaten?'btn-green':''}" onclick="toggleEaten('${mk}')">${eaten?'<i class="ti ti-check"></i> Eaten':'<i class="ti ti-circle-check"></i> Mark eaten'}</button>
-        <button class="btn" onclick="modifyMeal('${mk}')"><i class="ti ti-pencil"></i> ${note?'Edit note':'Ate different?'}</button>
-      </div></div>`;
+        <button class="btn" onclick="${_foodLogger.mk===mk?'closeFoodLogger()':'openFoodLogger(\''+mk+'\')'}"><i class="ti ti-${_foodLogger.mk===mk?'x':'plus'}"></i> ${_foodLogger.mk===mk?'Close':'Log food'}</button>
+      </div>
+      ${_foodLogger.mk===mk?`<div class="food-logger" id="food-logger-${mk}"></div>`:''}
+      </div>`;
     });
   }
   html+=`<h3>Supplements today</h3><div class="card">`;
   SUPPLEMENTS.forEach(s=>{html+=`<div class="ing-row"><div><div class="ing-name">${s.name}</div><div class="ing-detail">${s.note}</div></div><div class="ing-gram" style="color:var(--gtext)">${s.time}</div></div>`;});
   html+=`</div>`;
   document.getElementById('page-today').innerHTML=html;
+  if(_foodLogger.mk) renderFoodLogger(_foodLogger.mk);
 }
 
 function toggleRoutine(id){const l=getLog();if(!l.routine)l.routine={};l.routine[id]=!l.routine[id];save();scheduleSync(STATE.currentUser,'log');renderPage('today');}
@@ -662,6 +704,11 @@ function renderSettings(){
     <div style="font-size:13px;color:var(--text2);margin-bottom:10px">${(u.prefs?.liked||[]).length} liked · ${(u.prefs?.hated||[]).length} disliked</div>
     <button class="btn" onclick="showPage('quiz')" style="width:100%;justify-content:center"><i class="ti ti-pencil"></i> Update food preferences</button>
   </div>`;
+  html+=`<h3>USDA Food Database</h3><div class="card"><div class="modify-row">
+    <label>USDA API Key <span style="font-weight:400;color:var(--text3)">(free — needed for online food search)</span></label>
+    <input type="text" placeholder="Get free key at api.nal.usda.gov" value="${u.prefs?.usdaKey||''}" onchange="saveUsdaKey(this.value)">
+    <div style="font-size:11px;color:var(--text2);margin-top:4px">Used only when local search returns &lt;3 results. Goes directly to USDA, nowhere else.</div>
+  </div></div>`;
   html+=`<h3>Sync</h3><div class="card" style="padding:12px 16px;display:flex;flex-direction:column;gap:8px">
     <button class="btn btn-green" onclick="syncAll()"><i class="ti ti-cloud-upload"></i> Push all data to cloud</button>
     <button class="btn" onclick="loadFromCloud().then(()=>{renderAll();alert('Pulled ✓');})"><i class="ti ti-cloud-download"></i> Pull latest from cloud</button>
@@ -673,6 +720,7 @@ function renderSettings(){
 }
 function updateProfile(k,v){user().profile[k]=v;save();}
 function saveProfile(){save();scheduleSync(STATE.currentUser,'profile');alert('Profile saved! ✓');renderPage('today');}
+function saveUsdaKey(v){const u=user();if(!u.prefs)u.prefs={};u.prefs.usdaKey=v.trim();save();}
 function resetUser(){
   if(confirm(`Reset all data for ${STATE.currentUser}? Cannot be undone.`)){
     STATE[STATE.currentUser]={profile:null,prefs:null,logs:{},weekPlan:null};
@@ -911,6 +959,247 @@ function generatePlan(prefs){
     sat:{type:'surf',m1:mkM1(ps[5]),m2:mkM2(ps[6])},
     sun:{type:'rest',m1:mkM1(ps[6]),m2:mkM2(ps[0])}
   };
+}
+
+// ─── FOOD DATABASE (per 100g) ─────────────────────────────────────────────────
+const LOCAL_FOODS=[
+  // Eggs & dairy
+  {n:'Eggs, whole',p:12.6,f:9.5,c:0.7,cal:143,micros:{B12:1.1,iron:1.8,zinc:1.3,selenium:15}},
+  {n:'Egg whites',p:10.9,f:0.2,c:0.7,cal:52,micros:{B12:0.1,selenium:15}},
+  {n:'Butter',p:0.6,f:81,c:0.1,cal:717,micros:{vitA:684}},
+  {n:'Heavy cream',p:2.1,f:37,c:2.8,cal:340,micros:{vitA:285}},
+  {n:'Cheddar cheese',p:24.9,f:33.1,c:1.3,cal:403,micros:{calcium:710,vitA:265,zinc:3.1}},
+  {n:'Feta cheese',p:14.2,f:21.3,c:4.1,cal:264,micros:{calcium:493,sodium:917}},
+  {n:'Parmesan',p:35.8,f:25.8,c:3.2,cal:392,micros:{calcium:1184,zinc:2.9}},
+  {n:'Greek yoghurt (full fat)',p:9,f:5,c:3.6,cal:97,micros:{calcium:110,B12:0.75}},
+  {n:'Cream cheese',p:6.2,f:34.2,c:4.1,cal:350,micros:{vitA:287}},
+  // Meat & poultry
+  {n:'Beef mince 80/20',p:17.2,f:20,c:0,cal:250,micros:{iron:2.1,zinc:4.8,B12:2.6,selenium:18}},
+  {n:'Ribeye steak',p:22.3,f:23.5,c:0,cal:291,micros:{iron:1.8,zinc:5.4,B12:2.4,selenium:22}},
+  {n:'Chicken breast',p:31,f:3.6,c:0,cal:165,micros:{B12:0.3,selenium:27,zinc:1}},
+  {n:'Chicken thighs',p:24.8,f:10.9,c:0,cal:209,micros:{iron:1.3,zinc:2.4,B12:0.4,selenium:22}},
+  {n:'Bacon (pork)',p:12.3,f:45,c:0.6,cal:458,micros:{B12:0.6,selenium:24,sodium:1700}},
+  {n:'Pork belly',p:15,f:52,c:0,cal:518,micros:{B12:0.5,selenium:16}},
+  {n:'Lamb chops',p:22.7,f:22.5,c:0,cal:294,micros:{iron:1.7,zinc:4.2,B12:2.4,selenium:13}},
+  {n:'Pork sausages',p:14,f:28,c:2,cal:320,micros:{B12:0.5,selenium:14,sodium:850}},
+  {n:'Beef jerky',p:26,f:3.6,c:11.5,cal:182,micros:{iron:2.9,zinc:4.4,B12:1.5,sodium:1700}},
+  // Seafood
+  {n:'Salmon fillet',p:20.4,f:13.4,c:0,cal:208,micros:{omega3:2.3,vitD:14.4,B12:3.2,selenium:36}},
+  {n:'Smoked salmon',p:18.3,f:4.3,c:0,cal:117,micros:{omega3:1.2,B12:3.3,sodium:1880,selenium:36}},
+  {n:'Tuna (canned in oil)',p:25.5,f:8.2,c:0,cal:184,micros:{B12:2.5,selenium:91,omega3:0.2}},
+  {n:'Sardines (canned)',p:24.6,f:11.5,c:0,cal:208,micros:{calcium:382,omega3:1.5,vitD:4.8,B12:8.9}},
+  {n:'Mackerel',p:18.6,f:13.9,c:0,cal:205,micros:{omega3:2.7,vitD:16.1,B12:8.7,selenium:44}},
+  {n:'Prawns / shrimp',p:20.3,f:1.7,c:0.9,cal:99,micros:{selenium:39,zinc:1.5,iodine:40}},
+  {n:'White fish (barramundi)',p:18.8,f:1.5,c:0,cal:90,micros:{B12:1.0,selenium:12}},
+  {n:'Anchovies',p:28.9,f:9.7,c:0,cal:210,micros:{calcium:232,iron:3.3,omega3:1.5,sodium:3668}},
+  // Vegetables & greens
+  {n:'Spinach',p:2.9,f:0.4,c:3.6,cal:23,micros:{iron:2.7,magnesium:79,vitK:483,folate:194}},
+  {n:'Rocket / arugula',p:2.6,f:0.7,c:3.7,cal:25,micros:{vitK:109,folate:97,calcium:160}},
+  {n:'Romaine lettuce',p:1.2,f:0.3,c:3.3,cal:17,micros:{vitK:103,vitA:436,folate:136}},
+  {n:'Avocado',p:2,f:15,c:8.5,cal:160,micros:{potassium:485,folate:81,vitK:21,magnesium:29}},
+  {n:'Cucumber',p:0.7,f:0.1,c:3.6,cal:16,micros:{vitK:16}},
+  {n:'Cherry tomatoes',p:0.9,f:0.2,c:5.8,cal:18,micros:{vitC:21,vitA:75,potassium:237}},
+  {n:'Zucchini',p:1.2,f:0.3,c:3.1,cal:17,micros:{vitC:18,potassium:261}},
+  {n:'Mushrooms',p:3.1,f:0.3,c:3.3,cal:22,micros:{vitD:7,selenium:9.3,B12:0}},
+  {n:'Broccoli',p:2.8,f:0.4,c:6.6,cal:34,micros:{vitC:89,vitK:102,folate:63,iron:0.7}},
+  {n:'Capsicum / bell pepper',p:0.9,f:0.3,c:6,cal:31,micros:{vitC:128,vitA:157,folate:46}},
+  {n:'Red onion',p:1.1,f:0.1,c:9.3,cal:40,micros:{vitC:7,folate:19}},
+  {n:'Cauliflower',p:1.9,f:0.3,c:5,cal:25,micros:{vitC:48,vitK:16,folate:57}},
+  {n:'Kale',p:4.3,f:0.9,c:8.8,cal:49,micros:{vitK:817,vitA:681,vitC:93,iron:1.5}},
+  {n:'Asparagus',p:2.2,f:0.1,c:3.9,cal:20,micros:{folate:52,vitK:52,vitC:5}},
+  {n:'Green beans',p:1.8,f:0.1,c:7,cal:31,micros:{vitK:43,vitC:12}},
+  // Fats, nuts & seeds
+  {n:'Olive oil',p:0,f:100,c:0,cal:884,micros:{vitE:14}},
+  {n:'Coconut oil',p:0,f:100,c:0,cal:862,micros:{}},
+  {n:'Walnuts',p:15.2,f:65.2,c:13.7,cal:654,micros:{omega3:9,magnesium:158,zinc:3.1}},
+  {n:'Macadamia nuts',p:7.9,f:75.8,c:13.8,cal:718,micros:{magnesium:130,manganese:4.1}},
+  {n:'Almonds',p:21.2,f:49.9,c:21.6,cal:579,micros:{vitE:26,magnesium:270,calcium:264}},
+  {n:'Peanuts',p:25.8,f:49.2,c:16.1,cal:567,micros:{magnesium:168,folate:240,zinc:3.3}},
+  {n:'Almond butter',p:21,f:56,c:19,cal:614,micros:{vitE:24,magnesium:260,calcium:347}},
+  {n:'Chia seeds',p:16.5,f:30.7,c:42.1,cal:486,micros:{omega3:17.8,calcium:631,magnesium:335}},
+  {n:'Cacao nibs',p:12.3,f:43.1,c:34.5,cal:535,micros:{iron:6.3,magnesium:272,zinc:3.8}},
+  {n:'Pumpkin seeds',p:30.2,f:49.1,c:10.7,cal:574,micros:{zinc:7.8,magnesium:592,iron:8.8}},
+  // Condiments & misc
+  {n:'Garlic',p:6.4,f:0.5,c:33,cal:149,micros:{vitC:31,vitB6:1.2,selenium:14}},
+  {n:'Lemon juice',p:0.4,f:0.2,c:8.1,cal:22,micros:{vitC:39}},
+  {n:'Dijon mustard',p:3.7,f:3.3,c:5.8,cal:66,micros:{selenium:55,sodium:1130}},
+  {n:'Soy sauce',p:8.1,f:0.1,c:6.7,cal:53,micros:{sodium:5490}},
+  {n:'Apple cider vinegar',p:0,f:0,c:0.9,cal:3,micros:{}},
+  {n:'Erythritol',p:0,f:0,c:100,cal:20,micros:{}},
+  // Supplements / drinks
+  {n:'Whey protein powder',p:80,f:5,c:5,cal:380,micros:{calcium:500,B12:1.5}},
+  {n:'Collagen powder',p:90,f:0,c:0,cal:360,micros:{}},
+  {n:'Coffee (black)',p:0.3,f:0,c:0,cal:2,micros:{magnesium:7}},
+  {n:'Heavy cream (coffee)',p:2.1,f:37,c:2.8,cal:340,micros:{vitA:285}}
+];
+
+// ─── FOOD LOGGER STATE ────────────────────────────────────────────────────────
+let _foodLogger={mk:null,query:'',selected:null,results:[],usdaLoading:false,usdaResults:[],showMicros:{}};
+
+function openFoodLogger(mk){
+  _foodLogger={mk,query:'',selected:null,results:[],usdaLoading:false,usdaResults:[],showMicros:{}};
+  renderPage('today');
+  setTimeout(()=>document.getElementById('food-search-'+mk)?.focus(),50);
+}
+
+function closeFoodLogger(){_foodLogger.mk=null;renderPage('today');}
+
+function foodSearch(mk,q){
+  _foodLogger.query=q;_foodLogger.selected=null;_foodLogger.usdaResults=[];
+  if(!q.trim()){_foodLogger.results=[];renderFoodLogger(mk);return;}
+  const lq=q.toLowerCase();
+  _foodLogger.results=LOCAL_FOODS.filter(f=>f.n.toLowerCase().includes(lq)).slice(0,8);
+  renderFoodLogger(mk);
+}
+
+function selectFood(mk,idx,source){
+  const food=source==='usda'?_foodLogger.usdaResults[idx]:_foodLogger.results[idx];
+  _foodLogger.selected={...food,source:source||'local'};
+  _foodLogger.query=food.n;
+  _foodLogger.results=[];_foodLogger.usdaResults=[];
+  renderFoodLogger(mk);
+  setTimeout(()=>document.getElementById('food-grams-'+mk)?.focus(),50);
+}
+
+function addFoodEntry(mk){
+  const f=_foodLogger.selected;if(!f) return;
+  const gEl=document.getElementById('food-grams-'+mk);
+  const g=parseFloat(gEl?.value||'100');if(!g||g<=0) return;
+  const ratio=g/100;
+  const entry={
+    name:f.n,grams:g,
+    p:Math.round(f.p*ratio*10)/10,
+    f:Math.round(f.f*ratio*10)/10,
+    c:Math.round(f.c*ratio*10)/10,
+    cal:Math.round(f.cal*ratio),
+    source:f.source||'local',
+    micros:f.micros?Object.fromEntries(Object.entries(f.micros).map(([k,v])=>[k,Math.round(v*ratio*10)/10])):{}
+  };
+  const l=getLog();
+  if(!l[mk+'Foods']) l[mk+'Foods']=[];
+  l[mk+'Foods'].push(entry);
+  save();scheduleSync(STATE.currentUser,'log');
+  _foodLogger.selected=null;_foodLogger.query='';_foodLogger.results=[];_foodLogger.usdaResults=[];
+  renderFoodLogger(mk);
+}
+
+function removeFoodEntry(mk,idx){
+  const l=getLog();if(!l[mk+'Foods']) return;
+  l[mk+'Foods'].splice(idx,1);save();scheduleSync(STATE.currentUser,'log');
+  renderFoodLogger(mk);
+}
+
+function toggleMicros(mk,idx){
+  const key=mk+'-'+idx;_foodLogger.showMicros[key]=!_foodLogger.showMicros[key];
+  renderFoodLogger(mk);
+}
+
+async function searchUSDA(mk){
+  const key=user().prefs?.usdaKey;
+  if(!key){alert('Add your USDA API key in Profile → USDA API Key. Get one free at https://api.nal.usda.gov/');return;}
+  const q=_foodLogger.query;if(!q.trim()) return;
+  _foodLogger.usdaLoading=true;renderFoodLogger(mk);
+  try {
+    const r=await fetch(`https://api.nal.usda.gov/fdc/v1/foods/search?query=${encodeURIComponent(q)}&dataType=Foundation,SR%20Legacy&pageSize=8&api_key=${key}`);
+    const d=await r.json();
+    _foodLogger.usdaResults=(d.foods||[]).map(food=>{
+      const get=(id)=>{const n=food.foodNutrients?.find(x=>x.nutrientId===id);return n?.value||0;};
+      const micros={};
+      const microMap={vitA:1106,vitC:1162,vitD:1114,vitE:1109,vitK:1185,B12:1178,folate:1177,iron:1089,zinc:1095,calcium:1087,magnesium:1090,selenium:1103,omega3:1404,potassium:1092,sodium:1093,manganese:1101};
+      Object.entries(microMap).forEach(([k,id])=>{const v=get(id);if(v>0)micros[k]=v;});
+      return {n:food.description.replace(/,\s*raw$/i,'').replace(/,\s*cooked$/i,' (cooked)'),p:get(1003),f:get(1004),c:get(1005),cal:get(1008),source:'usda',micros};
+    });
+  } catch(e){alert('USDA search failed: '+e.message);}
+  _foodLogger.usdaLoading=false;renderFoodLogger(mk);
+}
+
+function renderFoodLogger(mk){
+  const el=document.getElementById('food-logger-'+mk);if(!el) return;
+  const l=getLog();const foods=l[mk+'Foods']||[];
+  const totals=foods.reduce((a,f)=>({p:a.p+f.p,f:a.f+f.f,c:a.c+f.c,cal:a.cal+f.cal}),{p:0,f:0,c:0,cal:0});
+  let html=`<div class="food-logger-title"><span><i class="ti ti-plus" style="font-size:11px"></i> Log what I ate</span><button onclick="closeFoodLogger()" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:18px;line-height:1">×</button></div>`;
+
+  // Logged entries
+  if(foods.length>0){
+    html+=`<div class="food-log-entries">`;
+    foods.forEach((f,i)=>{
+      const hasMicros=f.micros&&Object.keys(f.micros).length>0;
+      const showM=_foodLogger.showMicros[mk+'-'+i];
+      html+=`<div class="food-log-entry">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
+            <div class="food-log-entry-name">${f.name}</div>
+            <span class="food-result-src ${f.source==='usda'?'usda':''}">${f.source==='usda'?'USDA':'local'}</span>
+          </div>
+          <div class="food-log-entry-macros">${f.grams}g · ${f.p}g P · ${f.f}g F · ${f.c}g C · ${f.cal} cal</div>
+          ${hasMicros?`<button class="micros-toggle" onclick="toggleMicros('${mk}',${i})">${showM?'▲ Hide':'▼ Micros'}</button>`:''}
+          ${showM&&hasMicros?`<div class="micros-grid">${Object.entries(f.micros).map(([k,v])=>`<div class="micro-item"><span>${k}</span><span class="micro-val">${v}${k==='vitA'||k==='vitD'?'µg':k==='omega3'?'g':'mg'}</span></div>`).join('')}</div>`:''}
+        </div>
+        <button class="food-log-entry-del" onclick="removeFoodEntry('${mk}',${i})"><i class="ti ti-x"></i></button>
+      </div>`;
+    });
+    html+=`</div>`;
+    html+=`<div class="food-log-totals">
+      <div class="food-log-total"><div class="food-log-total-v green">${Math.round(totals.p*10)/10}g</div><div class="food-log-total-l">Protein</div></div>
+      <div class="food-log-total"><div class="food-log-total-v amber">${Math.round(totals.f*10)/10}g</div><div class="food-log-total-l">Fat</div></div>
+      <div class="food-log-total"><div class="food-log-total-v blue">${Math.round(totals.c*10)/10}g</div><div class="food-log-total-l">Carbs</div></div>
+      <div class="food-log-total"><div class="food-log-total-v">${Math.round(totals.cal)}</div><div class="food-log-total-l">Calories</div></div>
+    </div>`;
+  }
+
+  // Search
+  html+=`<div class="food-search-wrap">
+    <input type="text" id="food-search-${mk}" placeholder="Search food…" value="${_foodLogger.selected?_foodLogger.selected.n:_foodLogger.query}" oninput="foodSearch('${mk}',this.value)" autocomplete="off">
+    ${(_foodLogger.query||_foodLogger.selected)?`<button class="food-search-clear" onclick="_foodLogger.query='';_foodLogger.selected=null;_foodLogger.results=[];_foodLogger.usdaResults=[];renderFoodLogger('${mk}')">×</button>`:''}
+  </div>`;
+
+  // Local results
+  if(_foodLogger.results.length>0){
+    html+=`<div class="food-results">`;
+    _foodLogger.results.forEach((f,i)=>{
+      html+=`<div class="food-result-item" onclick="selectFood('${mk}',${i},'local')">
+        <div><div class="food-result-name">${f.n}</div><div class="food-result-macros">per 100g · ${f.p}g P · ${f.f}g F · ${f.c}g C · ${f.cal} cal</div></div>
+        <span class="food-result-src">local</span>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+
+  // USDA results
+  if(_foodLogger.usdaResults.length>0){
+    html+=`<div class="food-results">`;
+    _foodLogger.usdaResults.forEach((f,i)=>{
+      html+=`<div class="food-result-item" onclick="selectFood('${mk}',${i},'usda')">
+        <div><div class="food-result-name">${f.n}</div><div class="food-result-macros">per 100g · ${Math.round(f.p*10)/10}g P · ${Math.round(f.f*10)/10}g F · ${Math.round(f.c*10)/10}g C · ${Math.round(f.cal)} cal</div></div>
+        <span class="food-result-src usda">USDA</span>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+
+  // USDA search button — show when query exists and local results < 3
+  if(_foodLogger.query&&!_foodLogger.selected&&_foodLogger.results.length<3&&_foodLogger.usdaResults.length===0){
+    html+=`<button class="btn usda-btn" onclick="searchUSDA('${mk}')" ${_foodLogger.usdaLoading?'disabled':''}>
+      ${_foodLogger.usdaLoading?'<i class="ti ti-loader" style="animation:spin 1s linear infinite"></i> Searching USDA…':'<i class="ti ti-database-search"></i> Search USDA database'}
+    </button>`;
+  }
+
+  // Gram input + add button
+  if(_foodLogger.selected){
+    html+=`<div class="food-add-row">
+      <div class="food-selected-name">${_foodLogger.selected.n}</div>
+      <input type="number" id="food-grams-${mk}" placeholder="grams" value="100" min="1" max="2000" style="text-align:right">
+      <button class="btn btn-green btn-sm" onclick="addFoodEntry('${mk}')"><i class="ti ti-plus"></i> Add</button>
+    </div>
+    <div style="font-size:11px;color:var(--text2);margin-bottom:8px" id="food-preview-${mk}"></div>`;
+    html+=`<script>
+      (function(){const g=document.getElementById('food-grams-${mk}');const prev=document.getElementById('food-preview-${mk}');if(!g||!prev) return;
+      function upd(){const r=parseFloat(g.value||100)/100;prev.textContent=r?'= '+Math.round(${_foodLogger.selected.p}*r*10)/10+'g P · '+Math.round(${_foodLogger.selected.f}*r*10)/10+'g F · '+Math.round(${_foodLogger.selected.c}*r*10)/10+'g C · '+Math.round(${_foodLogger.selected.cal}*r)+' cal':'';}
+      g.addEventListener('input',upd);upd();})();
+    <\/script>`;
+  }
+
+  el.innerHTML=html;
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
