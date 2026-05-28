@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DietRight — Aaron & Bridie</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
+<style>
+:root{--bg:#f8f7f4;--card:#fff;--text:#1a1a18;--text2:#6b6b66;--text3:#9a9a94;--border:rgba(0,0,0,.10);--border2:rgba(0,0,0,.06);--green:#1D9E75;--gbg:#E1F5EE;--gtext:#085041;--amber:#EF9F27;--abg:#FAEEDA;--atext:#633806;--red:#E24B4A;--rbg:#FCEBEB;--rtext:#791F1F;--blue:#378ADD;--bbg:#E6F1FB;--btext:#185FA5;--pbg:#EEEDFE;--ptext:#3C3489;--r:12px;--rs:8px}
+@media(prefers-color-scheme:dark){:root{--bg:#1a1a18;--card:#252523;--text:#f0efe8;--text2:#a0a09a;--text3:#6b6b66;--border:rgba(255,255,255,.10);--border2:rgba(255,255,255,.06)}}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;max-width:680px;margin:0 auto;padding-bottom:80px}
+.hdr{background:var(--card);border-bottom:0.5px solid var(--border);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.hdr-logo{font-size:18px;font-weight:600;color:var(--green)}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.user-switch{display:flex;border:0.5px solid var(--border);border-radius:20px;overflow:hidden}
+.usr-btn{padding:5px 14px;font-size:12px;font-weight:500;border:none;background:none;cursor:pointer;color:var(--text2);transition:.15s}
+.usr-btn.active{background:var(--green);color:#fff}
+.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--text3);flex-shrink:0;transition:.3s;cursor:default}
+.sync-dot.syncing{background:var(--amber);animation:pulse 1s infinite}
+.sync-dot.ok{background:var(--green)}
+.sync-dot.err{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:680px;background:var(--card);border-top:0.5px solid var(--border);display:flex;z-index:100}
+.nav-btn{flex:1;padding:10px 4px 8px;border:none;background:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--text3);font-size:10px;font-weight:500;transition:.15s}
+.nav-btn.active{color:var(--green)}
+.nav-btn i{font-size:20px}
+.page{display:none;padding:16px}
+.page.active{display:block}
+.card{background:var(--card);border:0.5px solid var(--border);border-radius:var(--r);margin-bottom:12px;overflow:hidden}
+.card-hdr{padding:12px 16px;border-bottom:0.5px solid var(--border2);display:flex;justify-content:space-between;align-items:center}
+.card-title{font-size:14px;font-weight:600;color:var(--text)}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.stat{background:var(--card);border:0.5px solid var(--border);border-radius:var(--rs);padding:10px;text-align:center}
+.stat-v{font-size:18px;font-weight:600}
+.stat-l{font-size:10px;color:var(--text2);margin-top:2px}
+.green{color:var(--green)}.amber{color:var(--amber)}.red{color:var(--red)}.blue{color:var(--blue)}
+.tag{display:inline-block;font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500}
+.t-g{background:var(--gbg);color:var(--gtext)}.t-a{background:var(--abg);color:var(--atext)}.t-r{background:var(--rbg);color:var(--rtext)}.t-b{background:var(--bbg);color:var(--btext)}.t-p{background:var(--pbg);color:var(--ptext)}
+.ing-row{display:grid;grid-template-columns:1fr auto;gap:8px;padding:8px 16px;border-bottom:0.5px solid var(--border2);font-size:13px;align-items:center}
+.ing-row:last-child{border-bottom:none}
+.ing-name{color:var(--text);font-weight:500}
+.ing-detail{font-size:11px;color:var(--text2);margin-top:1px}
+.ing-gram{color:var(--text3);font-size:12px;white-space:nowrap;text-align:right}
+.meal-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:10px 16px;border-top:0.5px solid var(--border2)}
+.btn{padding:8px 16px;border-radius:var(--rs);border:0.5px solid var(--border);background:none;cursor:pointer;font-size:13px;font-weight:500;color:var(--text);display:inline-flex;align-items:center;gap:6px;transition:.15s;width:100%;justify-content:center}
+.btn:hover{background:var(--bg)}
+.btn-green{background:var(--green);color:#fff;border-color:var(--green)}
+.btn-green:hover{opacity:.9}
+.btn-sm{padding:5px 12px;font-size:12px;width:auto}
+.activity-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:12px 16px}
+.act-btn{padding:8px 4px;border-radius:var(--rs);border:0.5px solid var(--border);background:none;cursor:pointer;text-align:center;transition:.15s}
+.act-btn.active{border-color:var(--green);background:var(--gbg)}
+.act-name{font-size:12px;font-weight:500;color:var(--text)}
+.act-cal{font-size:10px;color:var(--text2);margin-top:2px}
+.act-btn.active .act-name{color:var(--gtext)}
+.act-btn.active .act-cal{color:var(--gtext)}
+input[type=number],input[type=text],textarea,select{width:100%;padding:8px 12px;border:0.5px solid var(--border);border-radius:var(--rs);background:var(--bg);color:var(--text);font-size:13px;font-family:inherit}
+input[type=number]:focus,input[type=text]:focus,textarea:focus,select:focus{outline:none;border-color:var(--green)}
+textarea{resize:vertical;min-height:60px}
+.modify-row{padding:10px 16px;border-bottom:0.5px solid var(--border2)}
+.modify-row:last-child{border-bottom:none}
+.modify-row label{font-size:12px;color:var(--text2);display:block;margin-bottom:4px}
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:12px}
+.wday{border:0.5px solid var(--border);border-radius:var(--rs);padding:8px 4px;text-align:center;cursor:pointer;transition:.15s;background:var(--card)}
+.wday:hover{border-color:var(--green)}
+.wday.today{border-color:var(--green);border-width:2px}
+.wday.complete{background:var(--gbg)}
+.wday-name{font-size:10px;font-weight:600;color:var(--text2);margin-bottom:4px}
+.wday-type{font-size:10px;color:var(--text2)}
+.wday-dot{width:6px;height:6px;border-radius:50%;margin:4px auto 0;background:var(--border)}
+.wday.complete .wday-dot{background:var(--green)}
+.routine-item{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:0.5px solid var(--border2);cursor:pointer}
+.routine-item:last-child{border-bottom:none}
+.routine-check{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.15s}
+.routine-item.done .routine-check{background:var(--green);border-color:var(--green);color:#fff}
+.routine-text{font-size:13px;color:var(--text)}
+.alert{border-left:3px solid var(--amber);background:var(--abg);border-radius:0 var(--rs) var(--rs) 0;padding:10px 14px;font-size:13px;color:var(--atext);line-height:1.5;margin-bottom:12px}
+.eaten-overlay{position:relative}
+.eaten-badge{position:absolute;top:10px;right:12px;background:var(--green);color:#fff;font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px}
+.chip-grid{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.chip{padding:6px 12px;border-radius:20px;border:0.5px solid var(--border);background:var(--card);cursor:pointer;font-size:13px;color:var(--text2);transition:.15s;user-select:none}
+.chip.yes{background:var(--gbg);border-color:var(--green);color:var(--gtext)}
+.chip.no{background:var(--rbg);border-color:var(--red);color:var(--rtext);text-decoration:line-through;opacity:.7}
+.quiz-step{display:none}.quiz-step.active{display:block}
+.progress-bar{height:4px;background:var(--border2);border-radius:2px;margin-bottom:16px;overflow:hidden}
+.progress-fill{height:4px;background:var(--green);border-radius:2px;transition:width .3s}
+.profile-field{margin-bottom:12px}
+.profile-field label{font-size:12px;color:var(--text2);font-weight:500;display:block;margin-bottom:4px}
+.setup-cta{padding:20px;text-align:center}
+.setup-cta h2{font-size:20px;font-weight:600;margin-bottom:8px}
+.setup-cta p{font-size:14px;color:var(--text2);margin-bottom:20px;line-height:1.6}
+.note-done{font-size:12px;color:var(--text2);font-style:italic;padding:6px 16px;background:var(--bg)}
+h3{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin:16px 0 8px}
+.water-glasses{display:flex;gap:6px;flex-wrap:wrap;padding:10px 16px 12px}
+.glass{width:32px;height:32px;border-radius:var(--rs);border:1.5px solid var(--border);background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:14px;transition:.15s}
+.glass.filled{border-color:var(--blue);background:var(--bbg);color:var(--btext)}
+.save-btn-wrap{padding:16px 0 0}
+/* Admin */
+.admin-table{width:100%;border-collapse:collapse;font-size:12px}
+.admin-table th{text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text2);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.admin-table td{padding:8px 10px;border-bottom:0.5px solid var(--border2);vertical-align:top}
+.admin-table tr:hover td{background:var(--bg)}
+.json-edit{font-family:monospace;font-size:11px;white-space:pre}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--card);border-radius:var(--r);padding:20px;width:90%;max-width:600px;max-height:80vh;overflow-y:auto}
+.modal h2{font-size:16px;font-weight:600;margin-bottom:12px}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="hdr-logo"><i class="ti ti-leaf" style="font-size:16px;vertical-align:-2px;margin-right:4px"></i>DietRight</div>
+  <div class="hdr-right">
+    <div id="sync-indicator" class="sync-dot" title="Sync status"></div>
+    <div class="user-switch">
+      <button class="usr-btn active" id="btn-aaron" onclick="switchUser('aaron')">Aaron</button>
+      <button class="usr-btn" id="btn-bridie" onclick="switchUser('bridie')">Bridie</button>
+    </div>
+    <button onclick="showPage('settings')" style="background:none;border:none;cursor:pointer;color:var(--text2);font-size:20px"><i class="ti ti-settings"></i></button>
+  </div>
+</div>
+
+<div id="page-today" class="page active"></div>
+<div id="page-week" class="page"></div>
+<div id="page-log" class="page"></div>
+<div id="page-settings" class="page"></div>
+<div id="page-quiz" class="page"></div>
+<div id="page-admin" class="page"></div>
+
+<nav class="nav">
+  <button class="nav-btn active" id="nav-today" onclick="showPage('today')"><i class="ti ti-calendar-today"></i>Today</button>
+  <button class="nav-btn" id="nav-week" onclick="showPage('week')"><i class="ti ti-calendar-week"></i>Week</button>
+  <button class="nav-btn" id="nav-log" onclick="showPage('log')"><i class="ti ti-pencil"></i>Log</button>
+  <button class="nav-btn" id="nav-settings" onclick="showPage('settings')"><i class="ti ti-user"></i>Profile</button>
+  <button class="nav-btn" id="nav-admin" onclick="showPage('admin')"><i class="ti ti-database"></i>Data</button>
+</nav>
+
+<!-- JSON edit modal -->
+<div class="modal-overlay" id="edit-modal">
+  <div class="modal">
+    <h2 id="modal-title">Edit</h2>
+    <textarea class="json-edit" id="modal-json" rows="18"></textarea>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn btn-green" onclick="saveModal()" style="flex:1"><i class="ti ti-device-floppy"></i> Save</button>
+      <button class="btn" onclick="closeModal()" style="width:auto;padding:8px 20px">Cancel</button>
+    </div>
+    <div id="modal-error" style="color:var(--red);font-size:12px;margin-top:8px;display:none"></div>
+  </div>
+</div>
+
+<script>
+// ─── SUPABASE ───────────────────────────────────────────────────────────────
+const SB_URL = 'https://fqzqllcscblgdvcllijy.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZxenFsbGNzY2JsZ2R2Y2xsaWp5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5MzA4MDEsImV4cCI6MjA5NTUwNjgwMX0.K2y1_QaqNSTYgEpziFkWx7sFpZWZFCrhmducXkH-o58';
+
+async function sbFetch(path, method='GET', body=null){
+  const opts={method,headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'}};
+  if(body) opts.body=JSON.stringify(body);
+  const r=await fetch(SB_URL+path,opts);
+  if(!r.ok) throw new Error(await r.text());
+  const t=await r.text(); return t?JSON.parse(t):null;
+}
+
+function setSyncDot(state){
+  const d=document.getElementById('sync-indicator');
+  if(!d) return;
+  d.className='sync-dot '+state;
+  d.title={syncing:'Syncing…',ok:'Synced',err:'Sync error — data saved locally'}[state]||'';
+}
+
+let _syncTimers={};
+function scheduleSync(uid,what){
+  clearTimeout(_syncTimers[uid+what]);
+  _syncTimers[uid+what]=setTimeout(()=>syncUser(uid,what),1500);
+}
+
+async function syncUser(uid,what){
+  setSyncDot('syncing');
+  try {
+    const u=STATE[uid];
+    if(what==='profile'||what==='all'){
+      await sbFetch('/rest/v1/profiles?id=eq.'+uid,'DELETE');
+      if(u.profile){
+        await sbFetch('/rest/v1/profiles','POST',{id:uid,data:{profile:u.profile,prefs:u.prefs}});
+      }
+      if(u.weekPlan){
+        await sbFetch('/rest/v1/week_plans?profile_id=eq.'+uid,'DELETE');
+        await sbFetch('/rest/v1/week_plans','POST',{id:uid+'-plan',profile_id:uid,data:u.weekPlan});
+      }
+    }
+    if(what==='log'||what==='all'){
+      const k=todayKey(); const log=u.logs[k];
+      if(log){
+        await sbFetch('/rest/v1/daily_logs?profile_id=eq.'+uid+'&date=eq.'+k,'DELETE');
+        await sbFetch('/rest/v1/daily_logs','POST',{id:uid+'-'+k,profile_id:uid,date:k,data:log});
+      }
+    }
+    setSyncDot('ok');
+  } catch(e){console.error('sync',e);setSyncDot('err');}
+}
+
+async function syncAll(){
+  setSyncDot('syncing');
+  await Promise.all(['aaron','bridie'].map(u=>syncUser(u,'all')));
+}
+
+async function loadFromCloud(){
+  setSyncDot('syncing');
+  try {
+    const [profiles,logs,plans]=await Promise.all([
+      sbFetch('/rest/v1/profiles?select=*'),
+      sbFetch('/rest/v1/daily_logs?select=*&order=date.desc&limit=120'),
+      sbFetch('/rest/v1/week_plans?select=*')
+    ]);
+    for(const p of profiles||[]){
+      if(!STATE[p.id]) STATE[p.id]={profile:null,prefs:null,logs:{},weekPlan:null};
+      if(p.data?.profile) STATE[p.id].profile=p.data.profile;
+      if(p.data?.prefs) STATE[p.id].prefs=p.data.prefs;
+    }
+    for(const l of logs||[]){
+      if(!STATE[l.profile_id]) STATE[l.profile_id]={profile:null,prefs:null,logs:{},weekPlan:null};
+      STATE[l.profile_id].logs[l.date]=l.data;
+    }
+    for(const wp of plans||[]){
+      if(STATE[wp.profile_id]) STATE[wp.profile_id].weekPlan=wp.data;
+    }
+    save(); setSyncDot('ok');
+  } catch(e){console.error('load',e);setSyncDot('err');}
+}
+
+// ─── DATA ───────────────────────────────────────────────────────────────────
+const DAYS=['sun','mon','tue','wed','thu','fri','sat'];
+const DAY_FULL=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+const AARON_PLAN={
+  mon:{type:'lift',m1:{time:'12pm',title:'Eggs + bacon + spinach + cheddar',ings:[
+    {n:'Whole eggs',d:'Scrambled in butter',g:'4 eggs · 200g'},
+    {n:'Streaky bacon',d:'Pan-fried until crisp',g:'3 rashers · 90g'},
+    {n:'Butter',d:'Cook eggs',g:'20g'},
+    {n:'Spinach',d:'Wilted in pan',g:'80g'},
+    {n:'Cheddar',d:'Grated over eggs',g:'50g'}
+  ],p:60,f:72,c:3,cal:900},m2:{time:'6:30pm',title:'Ribeye steak + rocket + avocado',ings:[
+    {n:'Ribeye steak',d:'Pan-sear 3 min/side, rest 5 min',g:'300g raw'},
+    {n:'Butter',d:'Baste steak with garlic',g:'25g'},
+    {n:'Garlic',d:'2 cloves crushed',g:'6g'},
+    {n:'Rocket / arugula',d:'Base of plate',g:'120g'},
+    {n:'Avocado',d:'Sliced alongside',g:'150g · 1 medium'},
+    {n:'Cherry tomatoes',d:'Halved',g:'60g'},
+    {n:'Olive oil',d:'Dress salad + drizzle steak',g:'35ml · 2½ tbsp'},
+    {n:'Walnuts',d:'Scattered on salad',g:'35g'}
+  ],p:78,f:118,c:11,cal:1420}},
+  tue:{type:'surf',m1:{time:'12pm',title:'Eggs + smoked salmon + feta',ings:[
+    {n:'Whole eggs',d:'Scrambled in butter',g:'4 eggs · 200g'},
+    {n:'Smoked salmon',d:'Laid alongside — no cooking',g:'120g'},
+    {n:'Butter',d:'Cook eggs',g:'20g'},
+    {n:'Spinach',d:'Wilted',g:'80g'},
+    {n:'Feta',d:'Crumbled over top',g:'40g'}
+  ],p:68,f:70,c:3,cal:900},m2:{time:'7pm',title:'Baked salmon + big salad',ings:[
+    {n:'Salmon fillet',d:'Baked 200°C / 12 min',g:'320g raw'},
+    {n:'Olive oil',d:'Coat salmon before baking',g:'20ml'},
+    {n:'Romaine lettuce',d:'Roughly chopped',g:'150g'},
+    {n:'Avocado',d:'Diced into salad',g:'150g · 1 medium'},
+    {n:'Cucumber',d:'Sliced',g:'100g'},
+    {n:'Red onion',d:'Thinly sliced',g:'30g'},
+    {n:'Feta',d:'Crumbled over salad',g:'50g'},
+    {n:'Olive oil',d:'Dressing',g:'25ml · 2 tbsp'},
+    {n:'Walnuts',d:'On top',g:'30g'}
+  ],p:84,f:130,c:9,cal:1540}},
+  wed:{type:'lift',m1:{time:'12pm',title:'Eggs + pork belly + mushrooms',ings:[
+    {n:'Whole eggs',d:'Fried in butter, runny yolk',g:'4 eggs · 200g'},
+    {n:'Pork belly slices',d:'Pan-fried until skin crispy',g:'130g raw'},
+    {n:'Butter',d:'Fry eggs',g:'15g'},
+    {n:'Mushrooms',d:'Sautéed with garlic + salt',g:'120g'},
+    {n:'Capsicum / bell pepper',d:'Sliced raw alongside',g:'80g'},
+    {n:'Parmesan',d:'Shaved over eggs',g:'25g'}
+  ],p:65,f:85,c:4,cal:1030},m2:{time:'6:30pm',title:'Beef mince bowl + rocket salad',ings:[
+    {n:'Beef mince 80/20',d:'Pan-fried, salt + pepper + garlic + cumin',g:'300g raw'},
+    {n:'Butter',d:'Finish mince off heat',g:'15g'},
+    {n:'Garlic',d:'2 cloves crushed',g:'6g'},
+    {n:'Rocket / arugula',d:'Base alongside',g:'120g'},
+    {n:'Cucumber',d:'Sliced',g:'100g'},
+    {n:'Red onion',d:'Thinly sliced',g:'30g'},
+    {n:'Olive oil',d:'Dress salad',g:'35ml · 2½ tbsp'},
+    {n:'Walnuts',d:'On salad',g:'35g'}
+  ],p:82,f:105,c:6,cal:1310}},
+  thu:{type:'walk',m1:{time:'12pm',title:'Eggs + smoked salmon + cheddar',ings:[
+    {n:'Whole eggs',d:'Scrambled in butter',g:'4 eggs · 200g'},
+    {n:'Smoked salmon',d:'Laid over eggs',g:'100g'},
+    {n:'Butter',d:'Cook eggs',g:'15g'},
+    {n:'Spinach',d:'Wilted',g:'80g'},
+    {n:'Cheddar',d:'Grated over',g:'30g'}
+  ],p:62,f:60,c:3,cal:800},m2:{time:'6pm',title:'Baked chicken breast + salad',ings:[
+    {n:'Chicken breast',d:'Baked 200°C / 20 min, olive oil + paprika',g:'280g raw'},
+    {n:'Olive oil',d:'Coat chicken before baking',g:'20ml'},
+    {n:'Romaine lettuce',d:'Chopped base',g:'150g'},
+    {n:'Avocado',d:'Diced',g:'150g · 1 medium'},
+    {n:'Cherry tomatoes',d:'Halved',g:'60g'},
+    {n:'Cucumber',d:'Sliced',g:'80g'},
+    {n:'Feta',d:'Crumbled over salad',g:'50g'},
+    {n:'Olive oil',d:'Dress salad',g:'20ml'}
+  ],p:78,f:90,c:8,cal:1140}},
+  fri:{type:'lift',m1:{time:'12pm',title:'Eggs + sausages + zucchini',ings:[
+    {n:'Whole eggs',d:'Scrambled in butter',g:'4 eggs · 200g'},
+    {n:'Pork sausages',d:'Pan-fried or grilled — check label <1g sugar',g:'2 links · 150g'},
+    {n:'Butter',d:'Eggs + zucchini',g:'20g'},
+    {n:'Zucchini',d:'Sliced, pan-fried until golden',g:'130g'},
+    {n:'Cheddar',d:'Melted over eggs',g:'40g'}
+  ],p:65,f:88,c:4,cal:1060},m2:{time:'6:30pm',title:'Grilled lamb + rocket + feta',ings:[
+    {n:'Lamb chops / leg steaks',d:'Grilled or BBQ, salt + rosemary + garlic',g:'300g raw · 2 chops'},
+    {n:'Butter',d:'Rest chops on this off grill',g:'15g'},
+    {n:'Rocket / arugula',d:'Base of plate',g:'120g'},
+    {n:'Avocado',d:'Sliced',g:'150g · 1 medium'},
+    {n:'Feta',d:'Crumbled generously',g:'50g'},
+    {n:'Cherry tomatoes',d:'Halved',g:'40g'},
+    {n:'Olive oil',d:'Dress salad',g:'30ml'},
+    {n:'Macadamia nuts',d:'On salad',g:'35g'}
+  ],p:82,f:115,c:6,cal:1360}},
+  sat:{type:'surf',m1:{time:'12pm',title:'Eggs + smoked salmon + parmesan',ings:[
+    {n:'Whole eggs',d:'Scrambled in butter',g:'4 eggs · 200g'},
+    {n:'Smoked salmon',d:'Alongside — no cooking',g:'150g'},
+    {n:'Butter',d:'Cook eggs',g:'20g'},
+    {n:'Spinach',d:'Wilted',g:'80g'},
+    {n:'Parmesan',d:'Shaved over',g:'30g'}
+  ],p:74,f:72,c:3,cal:940},m2:{time:'7pm',title:'Baked white fish + big bowl',ings:[
+    {n:'White fish (barramundi / snapper)',d:'Baked 200°C / 15 min, skin on',g:'350g raw'},
+    {n:'Olive oil',d:'Coat fish + squeeze lemon',g:'25ml'},
+    {n:'Romaine lettuce',d:'Roughly torn',g:'150g'},
+    {n:'Avocado',d:'Diced',g:'150g · 1 medium'},
+    {n:'Capsicum / bell pepper',d:'Sliced raw',g:'80g'},
+    {n:'Red onion',d:'Thinly sliced',g:'30g'},
+    {n:'Cucumber',d:'Sliced',g:'100g'},
+    {n:'Olive oil',d:'Dress salad',g:'25ml'},
+    {n:'Walnuts',d:'On top',g:'40g'}
+  ],p:88,f:128,c:10,cal:1530}},
+  sun:{type:'rest',m1:{time:'12pm',title:'Eggs + bacon + mushrooms',ings:[
+    {n:'Whole eggs',d:'Fried in butter',g:'3 eggs · 150g'},
+    {n:'Streaky bacon',d:'Pan-fried',g:'2 rashers · 60g'},
+    {n:'Butter',d:'Fry everything',g:'15g'},
+    {n:'Mushrooms',d:'Sautéed with garlic + salt',g:'100g'},
+    {n:'Spinach',d:'Wilted',g:'60g'}
+  ],p:50,f:56,c:2,cal:710},m2:{time:'6pm',title:'Slow beef mince + zucchini + parmesan',ings:[
+    {n:'Beef mince 80/20',d:'Slow-simmer 25 min: garlic + cumin + salt',g:'250g raw'},
+    {n:'Zucchini',d:'Diced, cooked into mince last 8 min',g:'150g'},
+    {n:'Mushrooms',d:'Sliced, added with zucchini',g:'80g'},
+    {n:'Butter',d:'Stir in at end',g:'15g'},
+    {n:'Garlic',d:'3 cloves crushed',g:'9g'},
+    {n:'Parmesan',d:'Grated generously over top',g:'35g'},
+    {n:'Rocket / arugula',d:'Simple side with olive oil',g:'80g'},
+    {n:'Olive oil',d:'Dress rocket',g:'20ml'}
+  ],p:75,f:85,c:8,cal:1020}}
+};
+
+const TYPE_INFO={
+  rest:{label:'Rest',cal:1800,color:'text3'},
+  walk:{label:'Walk',cal:2100,color:'amber'},
+  lift:{label:'Walk + lift',cal:2600,color:'blue'},
+  surf:{label:'Walk + surf',cal:2800,color:'green'}
+};
+
+const ROUTINE=[
+  {id:'sunlight',text:'Morning sunlight',sub:'Step outside 10 min within 20 min of waking'},
+  {id:'lemonwater',text:'500ml water + lemon + pinch of salt',sub:'Rehydrates, adrenal support, sodium top-up'},
+  {id:'walk',text:'2-mile fasted walk',sub:'Low-intensity, fat-burning, insulin sensitising'},
+  {id:'coffee',text:'Coffee + cream + erythritol + cinnamon',sub:'After walk — cortisol peak has subsided'}
+];
+
+const SUPPLEMENTS=[
+  {name:'Vitamin D3 5,000 IU + K2 100mcg',time:'Meal 1',note:'With fatty food for absorption'},
+  {name:'Zinc bisglycinate 25–30mg',time:'Meal 1',note:'Not with coffee — blocks absorption'},
+  {name:'Omega-3 fish oil 2–3g',time:'Meal 1',note:'Triglyceride form preferred'},
+  {name:'Boron 3–6mg',time:'Meal 1',note:'Lowers SHBG + estradiol'},
+  {name:'Ashwagandha KSM-66 600mg',time:'Meal 1',note:'Cortisol suppression → T support'},
+  {name:'Vitamin C 500–1,000mg',time:'Meal 1',note:'Adrenal + cortisol management'},
+  {name:'Creatine monohydrate 5g',time:'Either meal',note:'Timing not critical'},
+  {name:'Magnesium glycinate 400mg',time:'8–9pm',note:'Sleep quality + SHBG reduction'}
+];
+
+const ALL_FOODS={
+  seafood:['Salmon','Smoked salmon','Mackerel','Sardines','Tuna (canned)','Prawns / shrimp','White fish (barramundi, snapper)','Anchovies'],
+  meat:['Eggs','Bacon (pork)','Beef mince','Ribeye steak','Chicken thighs','Chicken breast','Lamb','Pork belly','Sausages (pork)','Beef jerky'],
+  greens:['Spinach','Rocket / arugula','Romaine lettuce','Cucumber','Cherry tomatoes','Avocado','Red onion','Capsicum / bell pepper','Watercress','Broccoli','Zucchini','Mushrooms'],
+  dairy:['Cheddar cheese','Feta cheese','Parmesan','Greek yoghurt','Butter','Heavy cream','Olive oil','Walnuts','Macadamia nuts','Almond butter','Peanuts','Cacao nibs','Cacao powder (raw)','Chia seeds'],
+  cooking:['Pan-fried / seared','Grilled / BBQ','Baked / oven roasted','Raw / salad-based','Stir-fry (coconut oil)','Slow-cooked / braised','Minimal prep (5 min)'],
+  timing:['2 meals a day','3 meals a day','Eat by feel / hunger','Fixed times every day']
+};
+
+const AARON_PREFS={
+  liked:['Salmon','Smoked salmon','White fish (barramundi, snapper)','Eggs','Bacon (pork)','Beef mince','Ribeye steak','Chicken breast','Lamb','Pork belly','Sausages (pork)','Spinach','Rocket / arugula','Romaine lettuce','Cucumber','Cherry tomatoes','Avocado','Red onion','Capsicum / bell pepper','Broccoli','Zucchini','Mushrooms','Cheddar cheese','Feta cheese','Parmesan','Greek yoghurt','Butter','Heavy cream','Olive oil','Walnuts','Macadamia nuts','Almond butter','Peanuts','Cacao nibs','Cacao powder (raw)','Chia seeds','Pan-fried / seared','Grilled / BBQ','Baked / oven roasted','Raw / salad-based','Stir-fry (coconut oil)','Slow-cooked / braised','Minimal prep (5 min)','2 meals a day','Eat by feel / hunger','Fixed times every day'],
+  hated:['Mackerel','Sardines','Tuna (canned)','Prawns / shrimp','Anchovies','Chicken thighs','Beef jerky','Watercress','3 meals a day']
+};
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+function loadState(){try{return JSON.parse(localStorage.getItem('dietright_v1'))||{};}catch(e){return {};}}
+function saveState(s){localStorage.setItem('dietright_v1',JSON.stringify(s));}
+
+function getState(){
+  const s=loadState();
+  if(!s.aaron) s.aaron={profile:{name:'Aaron',age:54,weight:110,targetWeight:100,height:173,gender:'male'},prefs:AARON_PREFS,logs:{},weekPlan:AARON_PLAN};
+  if(!s.bridie) s.bridie={profile:null,prefs:null,logs:{},weekPlan:null};
+  if(!s.currentUser) s.currentUser='aaron';
+  return s;
+}
+
+let STATE=getState();
+function save(){saveState(STATE);}
+function user(){return STATE[STATE.currentUser];}
+function today(){return DAYS[new Date().getDay()];}
+function todayKey(){return new Date().toISOString().split('T')[0];}
+function getLog(){
+  const u=user(),k=todayKey();
+  if(!u.logs[k]) u.logs[k]={weight:'',water:0,burnCal:'',activityType:getTodayPlan()?.type||'walk',routine:{},meal1Eaten:false,meal1Note:'',meal2Eaten:false,meal2Note:'',notes:''};
+  return u.logs[k];
+}
+function getTodayPlan(){return user().weekPlan?.[today()]||null;}
+function getCalTarget(){
+  const log=getLog(),base=TYPE_INFO[log.activityType]?.cal||2100;
+  if(log.burnCal&&log.burnCal>0) return Math.round(2450+parseInt(log.burnCal)-700);
+  return base;
+}
+function getAdjRatio(){
+  const log=getLog(),plan=getTodayPlan();
+  if(!plan) return 1;
+  const standard=TYPE_INFO[plan.type]?.cal||2100,target=getCalTarget();
+  return Math.round((target/standard)*10)/10;
+}
+
+// ─── ROUTING ─────────────────────────────────────────────────────────────────
+function switchUser(u){
+  STATE.currentUser=u;save();
+  document.getElementById('btn-aaron').classList.toggle('active',u==='aaron');
+  document.getElementById('btn-bridie').classList.toggle('active',u==='bridie');
+  renderAll();
+  if(!user().profile&&u==='bridie') showPage('quiz');
+  else showPage('today');
+}
+function showPage(p){
+  document.querySelectorAll('.page').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el=>el.classList.remove('active'));
+  document.getElementById('page-'+p)?.classList.add('active');
+  document.getElementById('nav-'+p)?.classList.add('active');
+  renderPage(p);
+}
+function renderAll(){
+  ['today','week','log','settings','admin'].forEach(p=>{
+    if(document.getElementById('page-'+p)?.classList.contains('active')) renderPage(p);
+  });
+}
+function renderPage(p){
+  ({today:renderToday,week:renderWeek,log:renderLog,settings:renderSettings,quiz:renderQuiz,admin:renderAdmin})[p]?.();
+}
+
+// ─── TODAY ────────────────────────────────────────────────────────────────────
+function renderToday(){
+  const u=user();
+  if(!u.profile){
+    document.getElementById('page-today').innerHTML=`<div class="setup-cta"><h2>Welcome!</h2><p>Let's set up your personalised plan. It takes about 2 minutes.</p><button class="btn btn-green" onclick="showPage('quiz')" style="width:100%;justify-content:center"><i class="ti ti-sparkles"></i> Set up my plan</button></div>`;
+    return;
+  }
+  const plan=getTodayPlan(),log=getLog(),now=new Date();
+  const ratio=getAdjRatio(),calTarget=getCalTarget(),ti=TYPE_INFO[log.activityType];
+  let html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div><div style="font-size:18px;font-weight:600">${DAY_FULL[now.getDay()]}</div><div style="font-size:12px;color:var(--text2)">${now.toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'})}</div></div>
+    <div style="text-align:right"><div style="font-size:22px;font-weight:700;color:var(--green)">${calTarget.toLocaleString()}</div><div style="font-size:11px;color:var(--text2)">cal target today</div></div>
+  </div>`;
+  const sc={rest:'text3',walk:'amber',lift:'blue',surf:'green'}[log.activityType];
+  html+=`<div class="stat-grid">
+    <div class="stat"><div class="stat-v ${sc}">${ti.label}</div><div class="stat-l">activity type</div></div>
+    <div class="stat"><div class="stat-v green">${u.profile.weight||'—'}</div><div class="stat-l">kg this morning</div></div>
+    <div class="stat"><div class="stat-v blue">${log.water?(log.water*0.25).toFixed(1)+'L':'0L'}</div><div class="stat-l">water drunk</div></div>
+    <div class="stat"><div class="stat-v amber">${ratio!==1?(ratio>1?'+':'')+Math.round((ratio-1)*100)+'%':'on plan'}</div><div class="stat-l">portion adjust</div></div>
+  </div>`;
+  html+=`<h3>Morning routine</h3><div class="card">`;
+  ROUTINE.forEach(r=>{
+    const done=log.routine?.[r.id]||false;
+    html+=`<div class="routine-item ${done?'done':''}" onclick="toggleRoutine('${r.id}')">
+      <div class="routine-check">${done?'<i class="ti ti-check" style="font-size:12px"></i>':''}</div>
+      <div><div class="routine-text">${r.text}</div><div style="font-size:11px;color:var(--text2)">${r.sub}</div></div>
+    </div>`;
+  });
+  html+=`</div><h3>Today's activity</h3><div class="card"><div class="activity-grid">`;
+  Object.entries(TYPE_INFO).forEach(([k,v])=>{
+    html+=`<button class="act-btn ${log.activityType===k?'active':''}" onclick="setActivity('${k}')"><div class="act-name">${v.label}</div><div class="act-cal">~${(v.cal/1000).toFixed(1)}k cal</div></button>`;
+  });
+  html+=`</div><div style="padding:0 16px 12px;display:flex;gap:10px;align-items:center">
+    <div style="font-size:12px;color:var(--text2);flex:1">Watch says I burned:</div>
+    <input type="number" id="burn-input" value="${log.burnCal||''}" placeholder="e.g. 850" style="width:100px;text-align:right" onchange="updateBurn(this.value)" oninput="updateBurn(this.value)">
+    <div style="font-size:12px;color:var(--text2)">cal</div>
+  </div></div>`;
+  html+=`<h3>Water intake</h3><div class="card"><div class="water-glasses">`;
+  for(let i=0;i<16;i++) html+=`<div class="glass ${i<log.water?'filled':''}" onclick="setWater(${i+1})"><i class="ti ti-droplet"></i></div>`;
+  html+=`</div><div style="padding:0 16px 10px;font-size:12px;color:var(--text2)">${log.water} glasses · ${(log.water*0.25).toFixed(2)}L of 3.5L daily target</div></div>`;
+  if(plan){
+    ['m1','m2'].forEach((mk,mi)=>{
+      const meal=plan[mk],eaten=log[mk+'Eaten'],note=log[mk+'Note'];
+      const adjNote=ratio!==1?`<div class="alert" style="margin:8px 16px 0;font-size:12px">Portions adjusted ${ratio>1?'up':'down'} ${Math.abs(Math.round((ratio-1)*100))}% based on your ${log.burnCal?'watch burn':'activity type'}.</div>`:'';
+      html+=`<h3>Meal ${mi+1} · ${meal.time}</h3><div class="card ${eaten?'eaten-overlay':''}">
+        ${eaten?'<div class="eaten-badge"><i class="ti ti-check"></i> Eaten</div>':''}
+        <div class="card-hdr"><div><div class="card-title">${meal.title}</div>
+          <div style="display:flex;gap:5px;margin-top:5px">
+            <span class="tag t-g">${meal.p}g P</span><span class="tag t-a">${meal.f}g F</span>
+            <span class="tag t-p">&lt;${meal.c}g C</span>
+            <span class="tag" style="background:var(--bg);color:var(--text2);border:0.5px solid var(--border)">${meal.cal} cal</span>
+          </div></div></div>${adjNote}`;
+      meal.ings.forEach(ing=>{
+        html+=`<div class="ing-row"><div><div class="ing-name">${ing.n}</div><div class="ing-detail">${ing.d}</div></div><div class="ing-gram">${ing.g}</div></div>`;
+      });
+      if(note) html+=`<div class="note-done">✎ ${note}</div>`;
+      html+=`<div class="meal-actions">
+        <button class="btn ${eaten?'btn-green':''}" onclick="toggleEaten('${mk}')">${eaten?'<i class="ti ti-check"></i> Eaten':'<i class="ti ti-circle-check"></i> Mark eaten'}</button>
+        <button class="btn" onclick="modifyMeal('${mk}')"><i class="ti ti-pencil"></i> ${note?'Edit note':'Ate different?'}</button>
+      </div></div>`;
+    });
+  }
+  html+=`<h3>Supplements today</h3><div class="card">`;
+  SUPPLEMENTS.forEach(s=>{html+=`<div class="ing-row"><div><div class="ing-name">${s.name}</div><div class="ing-detail">${s.note}</div></div><div class="ing-gram" style="color:var(--gtext)">${s.time}</div></div>`;});
+  html+=`</div>`;
+  document.getElementById('page-today').innerHTML=html;
+}
+
+function toggleRoutine(id){const l=getLog();if(!l.routine)l.routine={};l.routine[id]=!l.routine[id];save();scheduleSync(STATE.currentUser,'log');renderPage('today');}
+function setActivity(t){getLog().activityType=t;save();scheduleSync(STATE.currentUser,'log');renderPage('today');}
+function updateBurn(v){getLog().burnCal=v?parseInt(v):'';save();clearTimeout(window._bt);window._bt=setTimeout(()=>{scheduleSync(STATE.currentUser,'log');renderPage('today');},600);}
+function setWater(n){const l=getLog();l.water=l.water===n?n-1:n;if(l.water<0)l.water=0;save();scheduleSync(STATE.currentUser,'log');renderPage('today');}
+function toggleEaten(mk){const l=getLog();l[mk+'Eaten']=!l[mk+'Eaten'];save();scheduleSync(STATE.currentUser,'log');renderPage('today');}
+function modifyMeal(mk){const l=getLog();const n=prompt('What did you actually eat? (leave blank to clear)',l[mk+'Note']||'');if(n!==null){l[mk+'Note']=n;save();scheduleSync(STATE.currentUser,'log');renderPage('today');}}
+
+// ─── WEEK ─────────────────────────────────────────────────────────────────────
+function renderWeek(){
+  const u=user();
+  if(!u.profile){document.getElementById('page-week').innerHTML='<div class="setup-cta"><p>Set up your profile first.</p><button class="btn btn-green" onclick="showPage(\'quiz\')">Set up</button></div>';return;}
+  const plan=u.weekPlan,td=today();
+  const orderedDays=['mon','tue','wed','thu','fri','sat','sun'],orderedNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  let html=`<h3>This week</h3><div class="week-grid">`;
+  orderedDays.forEach((d,i)=>{
+    const dp=plan?.[d],ti=dp?TYPE_INFO[dp.type]:null,isToday=d===td;
+    const logK=getLogKeyFor(d),log=u.logs[logK],complete=log&&(log.meal1Eaten||log.meal2Eaten);
+    html+=`<div class="wday ${isToday?'today':''} ${complete?'complete':''}" onclick="showPage('today')">
+      <div class="wday-name">${orderedNames[i]}</div>
+      <div class="wday-type" style="color:var(--${ti?{rest:'text3',walk:'amber',lift:'blue',surf:'green'}[dp.type]:'text3'})">${ti?ti.label.split(' ')[0]:'-'}</div>
+      <div class="wday-dot"></div>
+    </div>`;
+  });
+  html+=`</div><div class="card"><div class="card-hdr"><div class="card-title">Weekly summary</div></div>`;
+  orderedDays.forEach((d,i)=>{
+    const dp=plan?.[d];if(!dp)return;
+    const isToday=d===td,totalCal=dp.m1.cal+dp.m2.cal,totalP=dp.m1.p+dp.m2.p;
+    html+=`<div class="ing-row" style="${isToday?'background:var(--gbg)':''}">
+      <div><div class="ing-name">${orderedNames[i]}${isToday?' ← today':''}</div>
+      <div class="ing-detail">${dp.m1.title} / ${dp.m2.title.substring(0,30)}…</div></div>
+      <div style="text-align:right"><div style="font-size:12px;font-weight:600">${totalCal} cal</div><div style="font-size:10px;color:var(--text2)">${totalP}g protein</div></div>
+    </div>`;
+  });
+  html+=`</div>`;
+  const wl=Object.entries(u.logs).filter(([k,v])=>v.weight).sort((a,b)=>a[0].localeCompare(b[0]));
+  if(wl.length>0){
+    html+=`<h3>Weight log</h3><div class="card">`;
+    wl.slice(-7).forEach(([k,v])=>{html+=`<div class="ing-row"><div class="ing-name">${new Date(k).toLocaleDateString('en-AU',{weekday:'short',day:'numeric',month:'short'})}</div><div class="ing-gram">${v.weight} kg</div></div>`;});
+    html+=`</div>`;
+  }
+  document.getElementById('page-week').innerHTML=html;
+}
+
+function getLogKeyFor(dayOfWeek){
+  const t=new Date(),ti=t.getDay(),tg=['sun','mon','tue','wed','thu','fri','sat'].indexOf(dayOfWeek);
+  const d=new Date(t);d.setDate(t.getDate()+(tg-ti));return d.toISOString().split('T')[0];
+}
+
+// ─── LOG ──────────────────────────────────────────────────────────────────────
+function renderLog(){
+  const u=user();
+  if(!u.profile){document.getElementById('page-log').innerHTML='<div class="setup-cta"><p>Set up your profile first.</p><button class="btn btn-green" onclick="showPage(\'quiz\')">Set up</button></div>';return;}
+  const log=getLog();
+  let html=`<h3>Today's log — ${new Date().toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long'})}</h3>`;
+  html+=`<div class="card"><div class="card-hdr"><div class="card-title">Morning measurements</div></div>
+    <div class="modify-row"><label>Morning weight (kg)</label>
+      <input type="number" step="0.1" value="${log.weight||''}" placeholder="${u.profile.weight||'e.g. 109.5'}" onchange="updateLog('weight',this.value)">
+    </div>
+    <div class="modify-row"><label>Water drunk today (glasses of 250ml)</label>
+      <div style="display:flex;align-items:center;gap:12px">
+        <input type="number" min="0" max="20" value="${log.water||0}" onchange="updateLog('water',parseInt(this.value))" style="width:80px">
+        <div style="font-size:13px;color:var(--text2)">${((log.water||0)*0.25).toFixed(2)}L</div>
+      </div>
+    </div>
+    <div class="modify-row"><label>Calorie burn from watch (cal)</label>
+      <input type="number" value="${log.burnCal||''}" placeholder="e.g. 650" onchange="updateLog('burnCal',parseInt(this.value))">
+    </div>
+    <div class="modify-row"><label>Activity type today</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:4px">`;
+  Object.entries(TYPE_INFO).forEach(([k,v])=>{
+    html+=`<button class="act-btn ${log.activityType===k?'active':''}" onclick="setActivity('${k}');renderPage('log')" style="padding:8px">${v.label}</button>`;
+  });
+  html+=`</div></div></div>`;
+  html+=`<div class="card"><div class="card-hdr"><div class="card-title">Morning routine</div></div>`;
+  ROUTINE.forEach(r=>{
+    const done=log.routine?.[r.id]||false;
+    html+=`<div class="routine-item ${done?'done':''}" onclick="toggleRoutine('${r.id}');renderPage('log')">
+      <div class="routine-check">${done?'<i class="ti ti-check" style="font-size:12px"></i>':''}</div>
+      <div class="routine-text">${r.text}</div>
+    </div>`;
+  });
+  html+=`</div><div class="card"><div class="card-hdr"><div class="card-title">Meals</div></div>
+    <div class="modify-row">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <label style="margin-bottom:0">Meal 1 eaten?</label>
+        <button class="btn btn-sm ${log.meal1Eaten?'btn-green':''}" onclick="toggleEaten('m1');renderPage('log')">${log.meal1Eaten?'✓ Yes':'No'}</button>
+      </div>
+      ${log.meal1Eaten?`<div style="margin-top:8px"><label>Any modifications?</label><textarea onchange="updateLog('meal1Note',this.value)">${log.meal1Note||''}</textarea></div>`:''}
+    </div>
+    <div class="modify-row">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <label style="margin-bottom:0">Meal 2 eaten?</label>
+        <button class="btn btn-sm ${log.meal2Eaten?'btn-green':''}" onclick="toggleEaten('m2');renderPage('log')">${log.meal2Eaten?'✓ Yes':'No'}</button>
+      </div>
+      ${log.meal2Eaten?`<div style="margin-top:8px"><label>Modifications or what you actually ate?</label><textarea onchange="updateLog('meal2Note',this.value)">${log.meal2Note||''}</textarea></div>`:''}
+    </div>
+    <div class="modify-row"><label>General notes</label>
+      <textarea onchange="updateLog('notes',this.value)" placeholder="How did you feel? Energy levels? Sleep?">${log.notes||''}</textarea>
+    </div>
+  </div>
+  <div class="save-btn-wrap"><button class="btn btn-green" onclick="saveLog()" style="width:100%;justify-content:center"><i class="ti ti-device-floppy"></i> Save today's log</button></div>`;
+  document.getElementById('page-log').innerHTML=html;
+}
+
+function updateLog(key,val){const l=getLog();l[key]=val;if(key==='weight')user().profile.weight=val;save();}
+function saveLog(){save();scheduleSync(STATE.currentUser,'log');alert('Log saved! ✓');renderPage('today');}
+
+// ─── SETTINGS ─────────────────────────────────────────────────────────────────
+function renderSettings(){
+  const u=user(),name=STATE.currentUser==='aaron'?'Aaron':'Bridie';
+  let html=`<h3>Profile — ${name}</h3>`;
+  if(!u.profile){
+    html+=`<div class="setup-cta"><p>No profile set up yet.</p><button class="btn btn-green" onclick="showPage('quiz')">Set up profile</button></div>`;
+    document.getElementById('page-settings').innerHTML=html;return;
+  }
+  const p=u.profile;
+  html+=`<div class="card"><div class="card-hdr"><div class="card-title">Personal details</div></div>
+    <div class="modify-row"><label>Name</label><input type="text" value="${p.name||''}" onchange="updateProfile('name',this.value)"></div>
+    <div class="modify-row"><label>Age</label><input type="number" value="${p.age||''}" onchange="updateProfile('age',parseInt(this.value))"></div>
+    <div class="modify-row"><label>Current weight (kg)</label><input type="number" step="0.1" value="${p.weight||''}" onchange="updateProfile('weight',parseFloat(this.value))"></div>
+    <div class="modify-row"><label>Target weight (kg)</label><input type="number" step="0.1" value="${p.targetWeight||''}" onchange="updateProfile('targetWeight',parseFloat(this.value))"></div>
+    <div class="modify-row"><label>Height (cm)</label><input type="number" value="${p.height||''}" onchange="updateProfile('height',parseInt(this.value))"></div>
+    <div style="padding:12px 16px"><button class="btn btn-green" onclick="saveProfile()" style="width:100%;justify-content:center"><i class="ti ti-device-floppy"></i> Save profile</button></div>
+  </div>`;
+  const startW=STATE.currentUser==='aaron'?110:(p.startWeight||p.weight||0);
+  const currentW=p.weight||startW,targetW=p.targetWeight||(currentW-10);
+  const lost=Math.max(0,startW-currentW),toGo=Math.max(0,currentW-targetW);
+  const progress=startW>targetW?Math.min(100,Math.round(lost/(startW-targetW)*100)):0;
+  html+=`<h3>Progress</h3><div class="card" style="padding:16px">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+      <div class="stat"><div class="stat-v">${startW}</div><div class="stat-l">start kg</div></div>
+      <div class="stat"><div class="stat-v green">${currentW}</div><div class="stat-l">current kg</div></div>
+      <div class="stat"><div class="stat-v amber">${targetW}</div><div class="stat-l">target kg</div></div>
+    </div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:6px">Lost: ${lost.toFixed(1)}kg · To go: ${toGo.toFixed(1)}kg</div>
+    <div style="height:8px;background:var(--border2);border-radius:4px;overflow:hidden">
+      <div style="width:${progress}%;height:8px;background:var(--green);border-radius:4px;transition:width .5s"></div>
+    </div>
+    <div style="font-size:11px;color:var(--text2);margin-top:4px">${progress}% to goal</div>
+  </div>`;
+  html+=`<h3>Food preferences</h3><div class="card" style="padding:12px 16px">
+    <div style="font-size:13px;color:var(--text2);margin-bottom:10px">${(u.prefs?.liked||[]).length} liked · ${(u.prefs?.hated||[]).length} disliked</div>
+    <button class="btn" onclick="showPage('quiz')" style="width:100%;justify-content:center"><i class="ti ti-pencil"></i> Update food preferences</button>
+  </div>`;
+  html+=`<h3>Sync</h3><div class="card" style="padding:12px 16px;display:flex;flex-direction:column;gap:8px">
+    <button class="btn btn-green" onclick="syncAll()"><i class="ti ti-cloud-upload"></i> Push all data to cloud</button>
+    <button class="btn" onclick="loadFromCloud().then(()=>{renderAll();alert('Pulled ✓');})"><i class="ti ti-cloud-download"></i> Pull latest from cloud</button>
+  </div>`;
+  html+=`<h3>Danger zone</h3><div class="card" style="padding:12px 16px">
+    <button class="btn" style="width:100%;justify-content:center;color:var(--red);border-color:var(--red)" onclick="resetUser()"><i class="ti ti-trash"></i> Reset ${name}'s data</button>
+  </div>`;
+  document.getElementById('page-settings').innerHTML=html;
+}
+function updateProfile(k,v){user().profile[k]=v;save();}
+function saveProfile(){save();scheduleSync(STATE.currentUser,'profile');alert('Profile saved! ✓');renderPage('today');}
+function resetUser(){
+  if(confirm(`Reset all data for ${STATE.currentUser}? Cannot be undone.`)){
+    STATE[STATE.currentUser]={profile:null,prefs:null,logs:{},weekPlan:null};
+    save();renderAll();showPage('quiz');
+  }
+}
+
+// ─── ADMIN / DATA PANEL ───────────────────────────────────────────────────────
+let _modalTarget=null;
+
+function renderAdmin(){
+  let html=`<h3>Data — All records</h3>`;
+
+  // Profiles table
+  html+=`<div class="card"><div class="card-hdr"><div class="card-title">Profiles & Plans</div>
+    <button class="btn btn-sm" onclick="loadFromCloud().then(()=>{renderAdmin();})"><i class="ti ti-refresh"></i> Refresh</button>
+  </div>
+  <table class="admin-table"><thead><tr><th>User</th><th>Name</th><th>Weight</th><th>Target</th><th>Plan</th><th></th></tr></thead><tbody>`;
+  ['aaron','bridie'].forEach(uid=>{
+    const p=STATE[uid]?.profile;
+    const hasPlan=!!STATE[uid]?.weekPlan;
+    html+=`<tr>
+      <td>${uid}</td><td>${p?.name||'—'}</td>
+      <td>${p?.weight||'—'} kg</td><td>${p?.targetWeight||'—'} kg</td>
+      <td>${hasPlan?'✓':'—'}</td>
+      <td style="display:flex;gap:4px">
+        <button class="btn btn-sm" onclick="editRecord('profile','${uid}')">Profile</button>
+        <button class="btn btn-sm" onclick="editRecord('weekplan','${uid}')">Plan</button>
+      </td>
+    </tr>`;
+  });
+  html+=`</tbody></table></div>`;
+
+  // Daily logs table
+  const allLogs=[];
+  ['aaron','bridie'].forEach(uid=>{
+    Object.entries(STATE[uid]?.logs||{}).forEach(([date,data])=>allLogs.push({uid,date,data}));
+  });
+  allLogs.sort((a,b)=>b.date.localeCompare(a.date));
+  html+=`<div class="card"><div class="card-hdr"><div class="card-title">Daily Logs (${allLogs.length} total)</div></div>
+  <table class="admin-table"><thead><tr><th>Date</th><th>User</th><th>Weight</th><th>Burn</th><th>Activity</th><th>Meals</th><th></th></tr></thead><tbody>`;
+  allLogs.slice(0,40).forEach(({uid,date,data})=>{
+    const meals=[data.meal1Eaten?'M1':'',data.meal2Eaten?'M2':''].filter(Boolean).join('+')||'—';
+    html+=`<tr>
+      <td>${date}</td><td>${uid}</td>
+      <td>${data.weight||'—'} kg</td>
+      <td>${data.burnCal||'—'}</td>
+      <td>${data.activityType||'—'}</td>
+      <td>${meals}</td>
+      <td><button class="btn btn-sm" onclick="editRecord('log','${uid}','${date}')"><i class="ti ti-pencil"></i></button></td>
+    </tr>`;
+  });
+  html+=`</tbody></table></div>`;
+
+  // Actions
+  html+=`<h3>Actions</h3><div class="card" style="padding:12px 16px;display:flex;flex-direction:column;gap:8px">
+    <button class="btn btn-green" onclick="syncAll()"><i class="ti ti-cloud-upload"></i> Push all to cloud</button>
+    <button class="btn" onclick="loadFromCloud().then(()=>{renderAdmin();})"><i class="ti ti-cloud-download"></i> Pull from cloud</button>
+    <button class="btn" onclick="exportJSON()"><i class="ti ti-download"></i> Export all data as JSON</button>
+    <button class="btn" id="import-toggle" onclick="document.getElementById('import-zone').style.display='block';this.style.display='none'"><i class="ti ti-upload"></i> Import JSON</button>
+  </div>`;
+  html+=`<div id="import-zone" style="display:none"><div class="card" style="padding:16px">
+    <label style="font-size:12px;color:var(--text2);display:block;margin-bottom:4px">Paste exported JSON to import</label>
+    <textarea id="import-json" rows="8" class="json-edit" placeholder='{"aaron":{...},"bridie":{...}}'></textarea>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn btn-green" onclick="importJSON()" style="flex:1"><i class="ti ti-check"></i> Import & sync</button>
+      <button class="btn" onclick="document.getElementById('import-zone').style.display='none';document.getElementById('import-toggle').style.display=''" style="width:auto;padding:8px 16px">Cancel</button>
+    </div>
+  </div></div>`;
+
+  document.getElementById('page-admin').innerHTML=html;
+}
+
+function editRecord(type,uid,date){
+  let data,title;
+  if(type==='profile'){data={profile:STATE[uid]?.profile,prefs:STATE[uid]?.prefs};title=`Edit profile — ${uid}`;}
+  else if(type==='weekplan'){data=STATE[uid]?.weekPlan||{};title=`Edit week plan — ${uid}`;}
+  else{data=STATE[uid]?.logs?.[date]||{};title=`Edit log — ${uid} / ${date}`;}
+  _modalTarget={type,uid,date};
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-json').value=JSON.stringify(data,null,2);
+  document.getElementById('modal-error').style.display='none';
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function saveModal(){
+  const raw=document.getElementById('modal-json').value;
+  let parsed;
+  try{parsed=JSON.parse(raw);}catch(e){
+    const el=document.getElementById('modal-error');el.textContent='Invalid JSON: '+e.message;el.style.display='block';return;
+  }
+  const {type,uid,date}=_modalTarget;
+  if(type==='profile'){STATE[uid].profile=parsed.profile;STATE[uid].prefs=parsed.prefs;save();scheduleSync(uid,'profile');}
+  else if(type==='weekplan'){STATE[uid].weekPlan=parsed;save();scheduleSync(uid,'profile');}
+  else{STATE[uid].logs[date]=parsed;save();scheduleSync(uid,'log');}
+  closeModal();renderAdmin();renderAll();
+}
+
+function closeModal(){document.getElementById('edit-modal').classList.remove('open');}
+
+function exportJSON(){
+  const blob=new Blob([JSON.stringify({aaron:STATE.aaron,bridie:STATE.bridie},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='dietright-'+todayKey()+'.json';a.click();
+}
+
+function importJSON(){
+  const raw=document.getElementById('import-json').value;
+  let parsed;try{parsed=JSON.parse(raw);}catch(e){alert('Invalid JSON: '+e.message);return;}
+  if(parsed.aaron) STATE.aaron={...STATE.aaron,...parsed.aaron};
+  if(parsed.bridie) STATE.bridie={...STATE.bridie,...parsed.bridie};
+  save();syncAll();renderAll();
+  document.getElementById('import-zone').style.display='none';
+  alert('Imported ✓');
+}
+
+// ─── QUIZ ─────────────────────────────────────────────────────────────────────
+let quizStep=0,quizPrefs={liked:[],hated:[]},quizProfile={};
+
+function renderQuiz(){
+  const name=STATE.currentUser==='aaron'?'Aaron':'Bridie',existing=user();
+  if(existing.prefs) quizPrefs=JSON.parse(JSON.stringify(existing.prefs));
+  if(existing.profile) quizProfile=JSON.parse(JSON.stringify(existing.profile));
+  else quizProfile={name,age:'',weight:'',targetWeight:'',height:'',gender:'female'};
+
+  let html=`<h3>Setup — ${name}</h3><div class="progress-bar"><div class="progress-fill" id="quiz-progress" style="width:${(quizStep/5)*100}%"></div></div>`;
+
+  html+=`<div class="quiz-step ${quizStep===0?'active':''}" id="qs0"><div class="card" style="padding:16px">
+    <div style="font-size:15px;font-weight:600;margin-bottom:12px">About you</div>
+    <div class="profile-field"><label>Name</label><input type="text" id="qp-name" value="${quizProfile.name||name}"></div>
+    <div class="profile-field"><label>Age</label><input type="number" id="qp-age" value="${quizProfile.age||''}"></div>
+    <div class="profile-field"><label>Current weight (kg)</label><input type="number" step="0.1" id="qp-weight" value="${quizProfile.weight||''}"></div>
+    <div class="profile-field"><label>Target weight (kg)</label><input type="number" step="0.1" id="qp-target" value="${quizProfile.targetWeight||''}"></div>
+    <div class="profile-field"><label>Height (cm)</label><input type="number" id="qp-height" value="${quizProfile.height||''}"></div>
+    <button class="btn btn-green" onclick="quizNext(0)" style="width:100%;justify-content:center;margin-top:4px">Next <i class="ti ti-arrow-right"></i></button>
+  </div></div>`;
+
+  [{key:'seafood',title:'Seafood & fish',icon:'ti-fish',foods:ALL_FOODS.seafood},
+   {key:'meat',title:'Meat, eggs & poultry',icon:'ti-meat',foods:ALL_FOODS.meat},
+   {key:'greens',title:'Salad & greens',icon:'ti-leaf',foods:ALL_FOODS.greens},
+   {key:'dairy',title:'Dairy, fats & nuts',icon:'ti-cheese',foods:ALL_FOODS.dairy}
+  ].forEach((s,i)=>{
+    html+=`<div class="quiz-step ${quizStep===i+1?'active':''}" id="qs${i+1}"><div class="card" style="padding:16px">
+      <div style="font-size:15px;font-weight:600;margin-bottom:4px"><i class="ti ${s.icon}" style="margin-right:6px"></i>${s.title}</div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:12px">Tap once = like · Tap twice = dislike · Leave for neutral</div>
+      <div class="chip-grid">`;
+    s.foods.forEach(f=>{
+      const st=quizPrefs.liked.includes(f)?'yes':quizPrefs.hated.includes(f)?'no':'';
+      html+=`<div class="chip ${st}" onclick="toggleChip('${f.replace(/'/g,"\\'")}',this)">${f}</div>`;
+    });
+    html+=`</div><button class="btn btn-green" onclick="quizNext(${i+1})" style="width:100%;justify-content:center">Next <i class="ti ti-arrow-right"></i></button></div></div>`;
+  });
+
+  html+=`<div class="quiz-step ${quizStep===5?'active':''}" id="qs5"><div class="card" style="padding:16px">
+    <div style="font-size:15px;font-weight:600;margin-bottom:12px">Cooking & timing</div>
+    <div style="font-size:13px;font-weight:500;margin-bottom:6px">Cooking styles</div>
+    <div class="chip-grid">`;
+  ALL_FOODS.cooking.forEach(f=>{
+    const st=quizPrefs.liked.includes(f)?'yes':quizPrefs.hated.includes(f)?'no':'';
+    html+=`<div class="chip ${st}" onclick="toggleChip('${f}',this)">${f}</div>`;
+  });
+  html+=`</div><div style="font-size:13px;font-weight:500;margin:12px 0 6px">Meals per day</div><div class="chip-grid">`;
+  ALL_FOODS.timing.forEach(f=>{
+    const st=quizPrefs.liked.includes(f)?'yes':quizPrefs.hated.includes(f)?'no':'';
+    html+=`<div class="chip ${st}" onclick="toggleChip('${f}',this)">${f}</div>`;
+  });
+  html+=`</div><button class="btn btn-green" onclick="quizFinish()" style="width:100%;justify-content:center"><i class="ti ti-sparkles"></i> Build my plan</button></div></div>`;
+
+  document.getElementById('page-quiz').innerHTML=html;
+}
+
+function toggleChip(food,el){
+  const cur=el.classList.contains('yes')?1:el.classList.contains('no')?2:0,next=(cur+1)%3;
+  el.classList.remove('yes','no');
+  quizPrefs.liked=quizPrefs.liked.filter(f=>f!==food);
+  quizPrefs.hated=quizPrefs.hated.filter(f=>f!==food);
+  if(next===1){el.classList.add('yes');quizPrefs.liked.push(food);}
+  if(next===2){el.classList.add('no');quizPrefs.hated.push(food);}
+}
+
+function quizNext(step){
+  if(step===0){
+    quizProfile.name=document.getElementById('qp-name')?.value||quizProfile.name;
+    quizProfile.age=parseInt(document.getElementById('qp-age')?.value)||quizProfile.age;
+    quizProfile.weight=parseFloat(document.getElementById('qp-weight')?.value)||quizProfile.weight;
+    quizProfile.targetWeight=parseFloat(document.getElementById('qp-target')?.value)||quizProfile.targetWeight;
+    quizProfile.height=parseInt(document.getElementById('qp-height')?.value)||quizProfile.height;
+    quizProfile.startWeight=quizProfile.startWeight||quizProfile.weight;
+    if(!quizProfile.weight){alert('Please enter your current weight.');return;}
+  }
+  quizStep++;renderQuiz();
+}
+
+function quizFinish(){
+  const u=user();
+  u.profile=quizProfile;u.prefs=quizPrefs;
+  if(!u.weekPlan||STATE.currentUser!=='aaron') u.weekPlan=generatePlan(quizPrefs);
+  save();scheduleSync(STATE.currentUser,'all');quizStep=0;showPage('today');
+}
+
+function generatePlan(prefs){
+  const liked=prefs.liked||[],hated=prefs.hated||[];
+  const proteins=['Salmon','Smoked salmon','White fish (barramundi, snapper)','Eggs','Bacon (pork)','Beef mince','Ribeye steak','Chicken breast','Lamb','Pork belly','Sausages (pork)']
+    .filter(p=>liked.includes(p)&&!hated.includes(p));
+  const hasButter=liked.includes('Butter'),hasOlive=liked.includes('Olive oil');
+  const cookFat=hasButter?'butter':hasOlive?'olive oil':'coconut oil';
+  const hasRomaine=liked.includes('Romaine lettuce'),hasRocket=liked.includes('Rocket / arugula'),hasSpinach=liked.includes('Spinach');
+  const greenBase=hasRomaine?'Romaine lettuce · 120g':hasRocket?'Rocket / arugula · 120g':hasSpinach?'Spinach · 120g':'Mixed greens · 100g';
+  const hasFeta=liked.includes('Feta cheese'),hasCheddar=liked.includes('Cheddar cheese');
+  const cheese=hasFeta?'Feta cheese':hasCheddar?'Cheddar cheese':'Parmesan';
+  const hasEggs=liked.includes('Eggs'),hasAvocado=liked.includes('Avocado'),hasWalnuts=liked.includes('Walnuts');
+  const ps=[...proteins];while(ps.length<7) ps.push(ps[ps.length%proteins.length]||'Chicken breast');
+  const mkM1=(protein,extras=[])=>({time:'12pm',title:`${hasEggs?'Eggs + ':''}${protein}`,p:55,f:50,c:3,cal:750,ings:[
+    ...(hasEggs?[{n:'Whole eggs',d:`Scrambled in ${cookFat}`,g:'3 eggs · 150g'}]:[]),
+    {n:protein,d:`Pan-fried in ${cookFat}`,g:'100g'},
+    {n:cookFat.charAt(0).toUpperCase()+cookFat.slice(1),d:'Cook with',g:'15g'},
+    ...(hasSpinach?[{n:'Spinach',d:'Wilted',g:'60g'}]:[]),
+    ...extras.map(e=>({n:e,d:'Alongside',g:'30g'}))
+  ]});
+  const mkM2=(protein)=>({time:'6:30pm',title:`${protein} + salad`,p:75,f:85,c:8,cal:1100,ings:[
+    {n:protein,d:'Grilled or baked',g:'250g raw'},
+    {n:cookFat.charAt(0).toUpperCase()+cookFat.slice(1),d:'Cook with',g:'15g'},
+    {n:greenBase.split('·')[0].trim(),d:'Base',g:greenBase.split('·')[1]?.trim()||'120g'},
+    ...(hasAvocado?[{n:'Avocado',d:'Sliced',g:'150g'}]:[]),
+    ...(liked.includes('Cucumber')?[{n:'Cucumber',d:'Sliced',g:'80g'}]:[]),
+    {n:cheese,d:'Crumbled over',g:'40g'},
+    ...(hasOlive?[{n:'Olive oil',d:'Dress salad',g:'25ml'}]:[]),
+    ...(hasWalnuts?[{n:'Walnuts',d:'On top',g:'30g'}]:[])
+  ]});
+  return {
+    mon:{type:'lift',m1:mkM1(ps[0],[cheese]),m2:mkM2(ps[1])},
+    tue:{type:'surf',m1:mkM1(ps[1]),m2:mkM2(ps[2])},
+    wed:{type:'lift',m1:mkM1(ps[2]),m2:mkM2(ps[3])},
+    thu:{type:'walk',m1:mkM1(ps[3],[cheese]),m2:mkM2(ps[4])},
+    fri:{type:'lift',m1:mkM1(ps[4]),m2:mkM2(ps[5])},
+    sat:{type:'surf',m1:mkM1(ps[5]),m2:mkM2(ps[6])},
+    sun:{type:'rest',m1:mkM1(ps[6]),m2:mkM2(ps[0])}
+  };
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+document.getElementById('edit-modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+renderPage('today');
+loadFromCloud().then(()=>renderAll());
+</script>
+</body>
+</html>
